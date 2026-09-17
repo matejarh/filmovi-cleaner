@@ -1,6 +1,6 @@
 # FilmoviPlex Cleaner
 
-A Brave/Chrome browser extension that blocks unwanted popup domains associated with FilmoviPlex pages.
+A Chromium-based browser extension that blocks unwanted popup domains associated with FilmoviPlex pages. It is designed to work in Brave, Google Chrome, Microsoft Edge, Opera, Vivaldi, and other Manifest V3-compatible Chromium browsers.
 
 ## Icon
 
@@ -28,10 +28,13 @@ This extension:
 
 ## Installation
 
-1. Open Brave and go to `brave://extensions`.
-2. Enable Developer mode.
-3. Click Load unpacked.
-4. Select this project folder.
+1. Open your Chromium-based browser (for example Brave, Chrome, Edge, Opera, or Vivaldi).
+2. Go to the extensions page for that browser.
+3. Enable Developer mode.
+4. Click Load unpacked.
+5. Select this project folder.
+
+This extension is intended for Chromium-based browsers that support Manifest V3 extensions.
 
 ## Usage
 
