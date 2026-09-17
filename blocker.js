@@ -14,7 +14,7 @@
      * ---------------------------------------------------------
      */
 
-    function normalizeDomain(domain) {
+    const normalizeDomain = domain => {
 
         return String(domain || "")
             .trim()
@@ -23,7 +23,7 @@
             .split("/")[0]
             .split(":")[0]
             .replace(/^\*\./, "");
-    }
+    };
 
 
     /*
@@ -32,7 +32,7 @@
      * ---------------------------------------------------------
      */
 
-    function getBlockedDomain(value) {
+    const getBlockedDomain = value => {
 
         if (!value)
             return null;
@@ -60,7 +60,7 @@
         }
 
         return null;
-    }
+    };
 
 
     /*
@@ -69,7 +69,7 @@
      * ---------------------------------------------------------
      */
 
-    function recordBlock(domain) {
+    const recordBlock = domain => {
 
         try {
 
@@ -87,7 +87,7 @@
                 error
             );
         }
-    }
+    };
 
 
     /*

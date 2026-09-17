@@ -5,7 +5,7 @@ const DEFAULT_DOMAINS = [
 const THEME_STORAGE_KEY = "filmoviplex-theme";
 
 
-function getThemePreference() {
+const getThemePreference = () => {
     const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
 
     if (savedTheme === "light" || savedTheme === "dark") {
@@ -13,10 +13,10 @@ function getThemePreference() {
     }
 
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
+};
 
 
-function applyTheme(theme) {
+const applyTheme = theme => {
     document.documentElement.setAttribute("data-theme", theme);
 
     const toggle = document.getElementById("themeToggle");
@@ -25,10 +25,10 @@ function applyTheme(theme) {
         toggle.textContent = theme === "dark" ? "☀️ Light" : "🌙 Dark";
         toggle.setAttribute("aria-label", theme === "dark" ? "Switch to light mode" : "Switch to dark mode");
     }
-}
+};
 
 
-function formatCompactNumber(value) {
+const formatCompactNumber = value => {
     const number = Number(value || 0);
 
     if (!Number.isFinite(number) || number === 0) {
@@ -51,10 +51,10 @@ function formatCompactNumber(value) {
     }
 
     return String(Math.round(number));
-}
+};
 
 
-function normalizeDomain(domain) {
+const normalizeDomain = domain => {
 
     return String(domain || "")
         .trim()
@@ -63,10 +63,10 @@ function normalizeDomain(domain) {
         .split("/")[0]
         .split(":")[0]
         .replace(/^\*\./, "");
-}
+};
 
 
-async function addDomainToList(domain) {
+const addDomainToList = async domain => {
     const normalizedDomain = normalizeDomain(domain);
 
     if (!normalizedDomain) {
@@ -98,7 +98,7 @@ async function addDomainToList(domain) {
  * ---------------------------------------------------------
  */
 
-async function load() {
+const load = async () => {
 
     applyTheme(getThemePreference());
 
@@ -134,7 +134,7 @@ async function load() {
  * ---------------------------------------------------------
  */
 
-function renderDomains(domains) {
+const renderDomains = domains => {
 
     const container =
         document.getElementById("domains");
@@ -284,7 +284,7 @@ document
  * ---------------------------------------------------------
  */
 
-function renderStats(data) {
+const renderStats = data => {
 
     document
         .getElementById("totalBlocked")
@@ -419,7 +419,7 @@ document
  * ---------------------------------------------------------
  */
 
-function showMessage(text) {
+const showMessage = text => {
 
     const element =
         document.getElementById("message");

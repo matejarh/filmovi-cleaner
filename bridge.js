@@ -3,7 +3,7 @@
 
     const PREFIX = "[FilmoviPlex Cleaner Bridge]";
 
-    function safeSendMessage(message, callback) {
+    const safeSendMessage = (message, callback) => {
         try {
             if (!chrome?.runtime?.id) {
                 return;
@@ -17,7 +17,7 @@
 
             console.warn(`${PREFIX} Unable to send message`, error);
         }
-    }
+    };
 
 
     /*

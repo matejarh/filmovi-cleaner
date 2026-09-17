@@ -11,7 +11,7 @@ const RULE_ID_BASE = 1000;
  * ---------------------------------------------------------
  */
 
-function normalizeDomain(domain) {
+const normalizeDomain = domain => {
 
     return String(domain || "")
         .trim()
@@ -20,7 +20,7 @@ function normalizeDomain(domain) {
         .split("/")[0]
         .split(":")[0]
         .replace(/^\*\./, "");
-}
+};
 
 
 /*
@@ -29,7 +29,7 @@ function normalizeDomain(domain) {
  * ---------------------------------------------------------
  */
 
-async function getDomains() {
+const getDomains = async () => {
 
     const data =
         await chrome.storage.local.get({
@@ -39,7 +39,7 @@ async function getDomains() {
     return data.blockedDomains
         .map(normalizeDomain)
         .filter(Boolean);
-}
+};
 
 
 /*
@@ -48,7 +48,7 @@ async function getDomains() {
  * ---------------------------------------------------------
  */
 
-async function updateRules(domains) {
+const updateRules = async domains => {
 
     const existing =
         await chrome.declarativeNetRequest
@@ -91,7 +91,7 @@ async function updateRules(domains) {
             removeRuleIds,
             addRules
         });
-}
+};
 
 
 /*
@@ -100,7 +100,7 @@ async function updateRules(domains) {
  * ---------------------------------------------------------
  */
 
-async function initialize() {
+const initialize = async () => {
 
     let domains =
         await getDomains();
@@ -114,7 +114,7 @@ async function initialize() {
     await updateRules(domains);
 
     await updateBadge();
-}
+};
 
 
 /*
@@ -123,7 +123,7 @@ async function initialize() {
  * ---------------------------------------------------------
  */
 
-async function recordBlock(domain) {
+const recordBlock = async domain => {
 
     const data =
         await chrome.storage.local.get({
@@ -165,7 +165,7 @@ async function recordBlock(domain) {
 
 
     await updateBadge();
-}
+};
 
 
 /*
@@ -174,7 +174,7 @@ async function recordBlock(domain) {
  * ---------------------------------------------------------
  */
 
-async function updateBadge() {
+const updateBadge = async () => {
 
     const data =
         await chrome.storage.local.get({
@@ -197,7 +197,7 @@ async function updateBadge() {
     await chrome.action.setBadgeBackgroundColor({
         color: "#d93025"
     });
-}
+};
 
 
 /*
