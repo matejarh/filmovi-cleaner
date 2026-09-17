@@ -12,7 +12,8 @@
   },
 
   "action": {
-    "default_title": "FilmoviPlex Cleaner"
+    "default_title": "FilmoviPlex Cleaner",
+    "default_popup": "popup.html"
   },
 
   "permissions": ["storage", "declarativeNetRequest"],

@@ -15,8 +15,10 @@ This extension:
 - blocks configured domains from loading on FilmoviPlex pages
 - catches popup traffic that standard browser shields and ad blockers can miss
 - tracks how many blocks occur
-- shows the most recent blocked domain in the options page
+- shows blocking statistics when the extension toolbar icon is clicked
+- shows the most recent blocked domain in the popup and options page
 - lets you add or remove blocked domains from the extension settings
+- follows the browser's light or dark theme automatically in the popup
 - supports dark and light theme in the options screen
 
 > Important: this extension targets popup domains used by FilmoviPlex pages and can block sources that Brave Shields, DuckDuckGo shields, and other generic popup/ad blockers do not reliably stop.
@@ -26,6 +28,8 @@ This extension:
 - `background.js` — background service worker that stores settings and applies dynamic network rules
 - `blocker.js` — main-world script that watches page traffic and reports blocked content
 - `bridge.js` — isolated-world bridge that relays messages from the page to the extension
+- `popup.html` — toolbar popup that displays the extension icon and blocking statistics
+- `popup.js` — popup statistics and options-page launcher logic
 - `options.html` — extension settings page
 - `options.js` — settings page logic, counts, theme toggle, and last-blocked-domain handling
 - `manifest.json` — extension manifest and permissions
@@ -43,9 +47,12 @@ This extension is intended for Chromium-based browsers that support Manifest V3 
 
 ## Usage
 
-1. Open the extension options page.
-2. Add domains you want blocked.
-3. Visit FilmoviPlex pages and the extension will automatically block matching popup traffic.
+1. Click the FilmoviPlex Cleaner icon in the browser toolbar to view blocked-popup statistics.
+2. Use **Manage domains** in the popup to open the extension options page.
+3. Add or remove domains in the extension options page.
+4. Visit FilmoviPlex pages and the extension will automatically block matching popup traffic.
+
+The toolbar popup follows the browser's light or dark appearance automatically. It does not have a theme button.
 
 ## Default domain
 
@@ -68,6 +75,10 @@ The extension starts with this domain blocked by default:
 ### Extension icon in browser
 
 ![Extension icon](icons/icon128.png)
+
+### Statistics popup
+
+![Statistics popup in dark theme](popup-stats-dark.png)
 
 ## Notes
 

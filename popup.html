@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilmoviPlex Cleaner</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f7f8fa;
+            --panel: #ffffff;
+            --text: #1f2933;
+            --muted: #697586;
+            --border: #e1e6eb;
+            --accent: #1976d2;
+            --accent-soft: #e8f1fb;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                color-scheme: dark;
+                --bg: #111827;
+                --panel: #1f2937;
+                --text: #f3f4f6;
+                --muted: #bcc6d5;
+                --border: #3b4759;
+                --accent: #60a5fa;
+                --accent-soft: #263d5b;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 320px;
+            margin: 0;
+            padding: 18px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Arial, sans-serif;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        header img {
+            width: 40px;
+            height: 40px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .subtitle {
+            margin: 3px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .total {
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--panel);
+        }
+
+        .total-label {
+            color: var(--muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .total-number {
+            margin-top: 4px;
+            color: var(--accent);
+            font-size: 34px;
+            font-weight: 700;
+        }
+
+        .details {
+            margin: 14px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .details strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        section {
+            margin-top: 16px;
+        }
+
+        h2 {
+            margin: 0 0 8px;
+            font-size: 13px;
+        }
+
+        #domainStats {
+            overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--panel);
+        }
+
+        .domain-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+
+        .domain-row + .domain-row {
+            border-top: 1px solid var(--border);
+        }
+
+        .domain-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .domain-count {
+            flex: 0 0 auto;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .empty {
+            padding: 10px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+
+        button {
+            padding: 7px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--panel);
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        button:hover {
+            background: var(--accent-soft);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="icons/icon128.png" alt="FilmoviPlex Cleaner icon">
+        <div>
+            <h1>FilmoviPlex Cleaner</h1>
+            <p class="subtitle">Popup blocking summary</p>
+        </div>
+    </header>
+
+    <main>
+        <div class="total">
+            <div class="total-label">Blocked popups</div>
+            <div class="total-number" id="totalBlocked">0</div>
+            <div class="details" id="lastBlocked">No blocks recorded yet.</div>
+        </div>
+
+        <section>
+            <h2>Blocks by domain</h2>
+            <div id="domainStats"></div>
+        </section>
+    </main>
+
+    <footer>
+        <button id="openOptions" type="button">Manage domains</button>
+    </footer>
+
+    <script src="popup.js"></script>
+</body>
+</html>
