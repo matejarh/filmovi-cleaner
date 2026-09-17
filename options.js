@@ -2,6 +2,31 @@ const DEFAULT_DOMAINS = [
     "remitalamends.qpon"
 ];
 
+const THEME_STORAGE_KEY = "filmoviplex-theme";
+
+
+function getThemePreference() {
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+
+    if (savedTheme === "light" || savedTheme === "dark") {
+        return savedTheme;
+    }
+
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+
+function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+
+    const toggle = document.getElementById("themeToggle");
+
+    if (toggle) {
+        toggle.textContent = theme === "dark" ? "☀️ Light" : "🌙 Dark";
+        toggle.setAttribute("aria-label", theme === "dark" ? "Switch to light mode" : "Switch to dark mode");
+    }
+}
+
 
 function normalizeDomain(domain) {
 
@@ -22,6 +47,8 @@ function normalizeDomain(domain) {
  */
 
 async function load() {
+
+    applyTheme(getThemePreference());
 
     const data =
         await chrome.storage.local.get({
@@ -127,6 +154,16 @@ function renderDomains(domains) {
  * Add domain
  * ---------------------------------------------------------
  */
+
+document
+    .getElementById("themeToggle")
+    .addEventListener("click", () => {
+        const nextTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+
+        localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+        applyTheme(nextTheme);
+    });
+
 
 document
     .getElementById("addDomain")

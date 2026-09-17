@@ -5,24 +5,75 @@
     <title>FilmoviPlex Cleaner</title>
 
     <style>
+        :root {
+            --bg: #f5f5f5;
+            --panel: #ffffff;
+            --panel-alt: #f1f1f1;
+            --text: #222222;
+            --muted: #777777;
+            --border: #dddddd;
+            --input-bg: #ffffff;
+            --input-border: #cccccc;
+            --accent: #1976d2;
+            --danger: #e53935;
+            --reset: #555555;
+            --shadow: rgba(0, 0, 0, 0.08);
+            --message: #1976d2;
+        }
+
+        :root[data-theme="dark"] {
+            --bg: #111827;
+            --panel: #1f2937;
+            --panel-alt: #2b3443;
+            --text: #f3f4f6;
+            --muted: #bcc6d5;
+            --border: #3b4759;
+            --input-bg: #111827;
+            --input-border: #475569;
+            --accent: #60a5fa;
+            --danger: #f87171;
+            --reset: #94a3b8;
+            --shadow: rgba(0, 0, 0, 0.32);
+            --message: #93c5fd;
+        }
+
         body {
             font-family: Arial, sans-serif;
             max-width: 700px;
             margin: 40px auto;
             padding: 0 20px;
-            background: #f5f5f5;
-            color: #222;
+            background: var(--bg);
+            color: var(--text);
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
 
         .container {
-            background: white;
+            background: var(--panel);
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,.08);
+            box-shadow: 0 2px 10px var(--shadow);
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
         }
 
         h1 {
             margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0;
+        }
+
+        h1 img {
+            display: block;
+            width: 32px;
+            height: 32px;
         }
 
         .domain {
@@ -31,13 +82,14 @@
             gap: 10px;
             margin: 8px 0;
             padding: 10px;
-            background: #f1f1f1;
+            background: var(--panel-alt);
             border-radius: 6px;
         }
 
         .domain-name {
             flex: 1;
             font-family: monospace;
+            color: var(--text);
         }
 
         button {
@@ -45,34 +97,53 @@
             border: 0;
             border-radius: 6px;
             padding: 8px 14px;
+            transition: opacity 0.2s ease;
+        }
+
+        button:hover {
+            opacity: 0.95;
         }
 
         .remove {
-            background: #e53935;
+            background: var(--danger);
             color: white;
         }
 
         .add {
-            background: #1976d2;
+            background: var(--accent);
             color: white;
         }
 
         .reset {
-            background: #555;
+            background: var(--reset);
             color: white;
+        }
+
+        .theme-toggle {
+            background: var(--panel-alt);
+            color: var(--text);
+            border: 1px solid var(--border);
+            font-weight: bold;
+            white-space: nowrap;
         }
 
         input {
             padding: 9px;
             width: 300px;
-            border: 1px solid #ccc;
+            border: 1px solid var(--input-border);
             border-radius: 6px;
+            background: var(--input-bg);
+            color: var(--text);
+        }
+
+        input::placeholder {
+            color: var(--muted);
         }
 
         .stats {
             margin-top: 30px;
             padding-top: 20px;
-            border-top: 1px solid #ddd;
+            border-top: 1px solid var(--border);
         }
 
         .big-number {
@@ -81,12 +152,12 @@
         }
 
         .muted {
-            color: #777;
+            color: var(--muted);
         }
 
         #message {
             margin-top: 15px;
-            color: #1976d2;
+            color: var(--message);
         }
     </style>
 </head>
@@ -95,7 +166,10 @@
 
 <div class="container">
 
-    <h1>🛡 FilmoviPlex Cleaner</h1>
+    <div class="header-row">
+        <h1><img src="icons/icon32.png" alt="Icon"> FilmoviPlex Cleaner</h1>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">🌙 Dark</button>
+    </div>
 
     <p>
         Domains blocked by the extension:
