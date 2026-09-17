@@ -66,6 +66,32 @@ function normalizeDomain(domain) {
 }
 
 
+async function addDomainToList(domain) {
+    const normalizedDomain = normalizeDomain(domain);
+
+    if (!normalizedDomain) {
+        return false;
+    }
+
+    const data = await chrome.storage.local.get({
+        blockedDomains: []
+    });
+
+    if (data.blockedDomains.includes(normalizedDomain)) {
+        return false;
+    }
+
+    await chrome.storage.local.set({
+        blockedDomains: [
+            ...data.blockedDomains,
+            normalizedDomain
+        ]
+    });
+
+    return true;
+}
+
+
 /*
  * ---------------------------------------------------------
  * Load everything
@@ -211,34 +237,16 @@ document
             return;
         }
 
+        const alreadyExists =
+            await addDomainToList(domain);
 
-        const data =
-            await chrome.storage.local.get({
-                blockedDomains: []
-            });
-
-
-        if (
-            data.blockedDomains.includes(domain)
-        ) {
-
+        if (!alreadyExists) {
             showMessage(
                 "That domain is already blocked."
             );
 
             return;
         }
-
-
-        const domains = [
-            ...data.blockedDomains,
-            domain
-        ];
-
-
-        await chrome.storage.local.set({
-            blockedDomains: domains
-        });
 
 
         input.value = "";
@@ -291,6 +299,8 @@ function renderStats(data) {
         document.getElementById("lastBlockedDomainText");
 
 
+    lastDomainText.textContent = "";
+
     if (
         data.lastBlocked &&
         data.lastBlockedDomain
@@ -303,8 +313,40 @@ function renderStats(data) {
         last.textContent =
             `Last blocked: ${date.toLocaleString()}`;
 
-        lastDomainText.textContent =
-            `Last blocked domain: ${data.lastBlockedDomain}`;
+        const label =
+            document.createElement("span");
+
+        label.textContent = "Last blocked domain: ";
+
+        lastDomainText.appendChild(label);
+
+        const domain = normalizeDomain(data.lastBlockedDomain);
+
+        if (data.blockedDomains.includes(domain)) {
+            const value =
+                document.createElement("span");
+
+            value.textContent = domain;
+            lastDomainText.appendChild(value);
+        } else {
+            const button =
+                document.createElement("button");
+
+            button.type = "button";
+            button.className = "clickable-domain";
+            button.textContent = domain;
+
+            button.addEventListener("click", async () => {
+                const added = await addDomainToList(domain);
+
+                if (added) {
+                    showMessage(`Added ${domain}`);
+                    load();
+                }
+            });
+
+            lastDomainText.appendChild(button);
+        }
 
     } else {
 
