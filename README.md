@@ -8,13 +8,18 @@ A Chromium-based browser extension that blocks unwanted popup domains associated
 
 ## What it does
 
+This extension is specifically designed to block popup domains that often bypass Brave Shields, DuckDuckGo Privacy Protection, and other general popup/ad blockers.
+
 This extension:
 
 - blocks configured domains from loading on FilmoviPlex pages
+- catches popup traffic that standard browser shields and ad blockers can miss
 - tracks how many blocks occur
 - shows the most recent blocked domain in the options page
 - lets you add or remove blocked domains from the extension settings
 - supports dark and light theme in the options screen
+
+> Important: this extension targets popup domains used by FilmoviPlex pages and can block sources that Brave Shields, DuckDuckGo shields, and other generic popup/ad blockers do not reliably stop.
 
 ## Files
 
