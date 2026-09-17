@@ -28,6 +28,32 @@ function applyTheme(theme) {
 }
 
 
+function formatCompactNumber(value) {
+    const number = Number(value || 0);
+
+    if (!Number.isFinite(number) || number === 0) {
+        return "0";
+    }
+
+    if (number >= 1000000) {
+        const millions = number / 1000000;
+        return `${millions >= 10 ? millions.toFixed(0) : millions.toFixed(1).replace(/\.0$/, "")}M`;
+    }
+
+    if (number >= 1000) {
+        const thousands = number / 1000;
+
+        if (thousands >= 100) {
+            return `${thousands.toFixed(0)}k`;
+        }
+
+        return `${thousands.toFixed(1).replace(/\.0$/, "")}k`;
+    }
+
+    return String(Math.round(number));
+}
+
+
 function normalizeDomain(domain) {
 
     return String(domain || "")
@@ -255,11 +281,14 @@ function renderStats(data) {
     document
         .getElementById("totalBlocked")
         .textContent =
-            data.totalBlocked || 0;
+            formatCompactNumber(data.totalBlocked || 0);
 
 
     const last =
         document.getElementById("lastBlocked");
+
+    const lastDomainText =
+        document.getElementById("lastBlockedDomainText");
 
 
     if (
@@ -272,12 +301,18 @@ function renderStats(data) {
 
 
         last.textContent =
-            `Last blocked: ${data.lastBlockedDomain} — ${date.toLocaleString()}`;
+            `Last blocked: ${date.toLocaleString()}`;
+
+        lastDomainText.textContent =
+            `Last blocked domain: ${data.lastBlockedDomain}`;
 
     } else {
 
         last.textContent =
             "No blocks recorded yet.";
+
+        lastDomainText.textContent =
+            "Last blocked domain: none";
     }
 
 
@@ -299,7 +334,7 @@ function renderStats(data) {
                 document.createElement("div");
 
             row.textContent =
-                `${domain}: ${count}`;
+                `${domain}: ${formatCompactNumber(count)}`;
 
             stats.appendChild(row);
         });
