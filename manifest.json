@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "FilmoviPlex Cleaner",
+  "version": "1.3.1",
+  "description": "Blocks unwanted advertising popups on FilmoviPlex.",
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "action": {
+    "default_title": "FilmoviPlex Cleaner"
+  },
+
+  "permissions": ["storage", "declarativeNetRequest"],
+
+  "host_permissions": ["*://*.filmoviplex.com/*", "*://*.remitalamends.qpon/*"],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "options_page": "options.html",
+
+  "content_scripts": [
+    {
+      "matches": ["*://filmoviplex.com/*", "*://*.filmoviplex.com/*"],
+      "js": ["blocker.js"],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": true
+    },
+    {
+      "matches": ["*://filmoviplex.com/*", "*://*.filmoviplex.com/*"],
+      "js": ["bridge.js"],
+      "run_at": "document_start",
+      "world": "ISOLATED",
+      "all_frames": true
+    }
+  ]
+}
