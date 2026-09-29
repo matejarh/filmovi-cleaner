@@ -1,9 +1,6 @@
-const DEFAULT_DOMAINS = [
-    "remitalamends.qpon"
-];
+const DEFAULT_DOMAINS = ["remitalamends.qpon"];
 
 const RULE_ID_BASE = 1000;
-
 
 /*
  * ---------------------------------------------------------
@@ -11,7 +8,7 @@ const RULE_ID_BASE = 1000;
  * ---------------------------------------------------------
  */
 
-const normalizeDomain = domain => {
+/* const normalizeDomain = domain => {
 
     return String(domain || "")
         .trim()
@@ -20,8 +17,16 @@ const normalizeDomain = domain => {
         .split("/")[0]
         .split(":")[0]
         .replace(/^\*\./, "");
+}; */
+const normalizeDomain = (domain) => {
+  return String(domain || "")
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .split("/")[0]
+    .split(":")[0]
+    .replace(/^\*\./, "");
 };
-
 
 /*
  * ---------------------------------------------------------
@@ -30,17 +35,12 @@ const normalizeDomain = domain => {
  */
 
 const getDomains = async () => {
+  const data = await chrome.storage.local.get({
+    blockedDomains: DEFAULT_DOMAINS,
+  });
 
-    const data =
-        await chrome.storage.local.get({
-            blockedDomains: DEFAULT_DOMAINS
-        });
-
-    return data.blockedDomains
-        .map(normalizeDomain)
-        .filter(Boolean);
+  return data.blockedDomains.map(normalizeDomain).filter(Boolean);
 };
-
 
 /*
  * ---------------------------------------------------------
@@ -48,51 +48,38 @@ const getDomains = async () => {
  * ---------------------------------------------------------
  */
 
-const updateRules = async domains => {
+const updateRules = async (domains) => {
+  const existing = await chrome.declarativeNetRequest.getDynamicRules();
 
-    const existing =
-        await chrome.declarativeNetRequest
-            .getDynamicRules();
+  const removeRuleIds = existing.map((rule) => rule.id);
 
-    const removeRuleIds =
-        existing.map(rule => rule.id);
+  const addRules = domains.map((domain, index) => ({
+    id: RULE_ID_BASE + index,
 
+    priority: 100,
 
-    const addRules =
-        domains.map((domain, index) => ({
+    action: {
+      type: "block",
+    },
 
-            id: RULE_ID_BASE + index,
+    condition: {
+      requestDomains: [domain],
 
-            priority: 100,
+      resourceTypes: [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "other",
+      ],
+    },
+  }));
 
-            action: {
-                type: "block"
-            },
-
-            condition: {
-
-                requestDomains: [
-                    domain
-                ],
-
-                resourceTypes: [
-                    "main_frame",
-                    "sub_frame",
-                    "script",
-                    "xmlhttprequest",
-                    "other"
-                ]
-            }
-        }));
-
-
-    await chrome.declarativeNetRequest
-        .updateDynamicRules({
-            removeRuleIds,
-            addRules
-        });
+  await chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds,
+    addRules,
+  });
 };
-
 
 /*
  * ---------------------------------------------------------
@@ -101,21 +88,16 @@ const updateRules = async domains => {
  */
 
 const initialize = async () => {
+  let domains = await getDomains();
 
-    let domains =
-        await getDomains();
+  await chrome.storage.local.set({
+    blockedDomains: domains,
+  });
 
+  await updateRules(domains);
 
-    await chrome.storage.local.set({
-        blockedDomains: domains
-    });
-
-
-    await updateRules(domains);
-
-    await updateBadge();
+  await updateBadge();
 };
-
 
 /*
  * ---------------------------------------------------------
@@ -123,50 +105,35 @@ const initialize = async () => {
  * ---------------------------------------------------------
  */
 
-const recordBlock = async domain => {
+const recordBlock = async (domain) => {
+  const data = await chrome.storage.local.get({
+    totalBlocked: 0,
 
-    const data =
-        await chrome.storage.local.get({
+    blockedByDomain: {},
 
-            totalBlocked: 0,
+    lastBlocked: null,
 
-            blockedByDomain: {},
+    lastBlockedDomain: null,
+  });
 
-            lastBlocked: null,
+  const total = Number(data.totalBlocked) || 0;
 
-            lastBlockedDomain: null
-        });
+  const byDomain = data.blockedByDomain || {};
 
+  byDomain[domain] = (Number(byDomain[domain]) || 0) + 1;
 
-    const total =
-        Number(data.totalBlocked) || 0;
+  await chrome.storage.local.set({
+    totalBlocked: total + 1,
 
+    blockedByDomain: byDomain,
 
-    const byDomain =
-        data.blockedByDomain || {};
+    lastBlocked: new Date().toISOString(),
 
+    lastBlockedDomain: domain,
+  });
 
-    byDomain[domain] =
-        (Number(byDomain[domain]) || 0) + 1;
-
-
-    await chrome.storage.local.set({
-
-        totalBlocked: total + 1,
-
-        blockedByDomain: byDomain,
-
-        lastBlocked:
-            new Date().toISOString(),
-
-        lastBlockedDomain:
-            domain
-    });
-
-
-    await updateBadge();
+  await updateBadge();
 };
-
 
 /*
  * ---------------------------------------------------------
@@ -175,30 +142,20 @@ const recordBlock = async domain => {
  */
 
 const updateBadge = async () => {
+  const data = await chrome.storage.local.get({
+    totalBlocked: 0,
+  });
 
-    const data =
-        await chrome.storage.local.get({
-            totalBlocked: 0
-        });
+  const count = Number(data.totalBlocked) || 0;
 
+  await chrome.action.setBadgeText({
+    text: count > 0 ? String(count) : "",
+  });
 
-    const count =
-        Number(data.totalBlocked) || 0;
-
-
-    await chrome.action.setBadgeText({
-        text:
-            count > 0
-                ? String(count)
-                : ""
-    });
-
-
-    await chrome.action.setBadgeBackgroundColor({
-        color: "#d93025"
-    });
+  await chrome.action.setBadgeBackgroundColor({
+    color: "#d93025",
+  });
 };
-
 
 /*
  * ---------------------------------------------------------
@@ -206,45 +163,31 @@ const updateBadge = async () => {
  * ---------------------------------------------------------
  */
 
-chrome.runtime.onMessage.addListener(
-    (message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "BLOCKED") {
+    recordBlock(normalizeDomain(message.domain));
 
-        if (message.type === "BLOCKED") {
+    return;
+  }
 
-            recordBlock(
-                normalizeDomain(message.domain)
-            );
+  if (message.type === "GET_DOMAINS") {
+    getDomains()
+      .then((domains) => {
+        sendResponse({
+          domains,
+        });
+      })
+      .catch((error) => {
+        console.error(error);
 
-            return;
-        }
+        sendResponse({
+          domains: DEFAULT_DOMAINS,
+        });
+      });
 
-
-        if (message.type === "GET_DOMAINS") {
-
-            getDomains()
-                .then(domains => {
-
-                    sendResponse({
-                        domains
-                    });
-
-                })
-                .catch(error => {
-
-                    console.error(error);
-
-                    sendResponse({
-                        domains:
-                            DEFAULT_DOMAINS
-                    });
-                });
-
-
-            return true;
-        }
-    }
-);
-
+    return true;
+  }
+});
 
 /*
  * ---------------------------------------------------------
@@ -252,25 +195,15 @@ chrome.runtime.onMessage.addListener(
  * ---------------------------------------------------------
  */
 
-chrome.storage.onChanged.addListener(
-    async (changes, area) => {
+chrome.storage.onChanged.addListener(async (changes, area) => {
+  if (area !== "local" || !changes.blockedDomains) {
+    return;
+  }
 
-        if (
-            area !== "local" ||
-            !changes.blockedDomains
-        ) {
-            return;
-        }
+  const domains = changes.blockedDomains.newValue || [];
 
-
-        const domains =
-            changes.blockedDomains.newValue || [];
-
-
-        await updateRules(domains);
-    }
-);
-
+  await updateRules(domains);
+});
 
 /*
  * ---------------------------------------------------------
@@ -279,13 +212,11 @@ chrome.storage.onChanged.addListener(
  */
 
 chrome.runtime.onInstalled.addListener(() => {
-    initialize().catch(console.error);
+  initialize().catch(console.error);
 });
-
 
 chrome.runtime.onStartup.addListener(() => {
-    initialize().catch(console.error);
+  initialize().catch(console.error);
 });
-
 
 initialize().catch(console.error);

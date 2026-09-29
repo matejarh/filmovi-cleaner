@@ -1,60 +1,59 @@
-const DEFAULT_DOMAINS = [
-    "remitalamends.qpon"
-];
+const DEFAULT_DOMAINS = ["remitalamends.qpon"];
 
 const THEME_STORAGE_KEY = "filmoviplex-theme";
 
-
 const getThemePreference = () => {
-    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+  const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
 
-    if (savedTheme === "light" || savedTheme === "dark") {
-        return savedTheme;
-    }
+  if (savedTheme === "light" || savedTheme === "dark") {
+    return savedTheme;
+  }
 
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 };
 
+const applyTheme = (theme) => {
+  document.documentElement.setAttribute("data-theme", theme);
 
-const applyTheme = theme => {
-    document.documentElement.setAttribute("data-theme", theme);
+  const toggle = document.getElementById("themeToggle");
 
-    const toggle = document.getElementById("themeToggle");
-
-    if (toggle) {
-        toggle.textContent = theme === "dark" ? "☀️ Light" : "🌙 Dark";
-        toggle.setAttribute("aria-label", theme === "dark" ? "Switch to light mode" : "Switch to dark mode");
-    }
+  if (toggle) {
+    toggle.textContent = theme === "dark" ? "☀️ Light" : "🌙 Dark";
+    toggle.setAttribute(
+      "aria-label",
+      theme === "dark" ? "Switch to light mode" : "Switch to dark mode",
+    );
+  }
 };
 
+const formatCompactNumber = (value) => {
+  const number = Number(value || 0);
 
-const formatCompactNumber = value => {
-    const number = Number(value || 0);
+  if (!Number.isFinite(number) || number === 0) {
+    return "0";
+  }
 
-    if (!Number.isFinite(number) || number === 0) {
-        return "0";
+  if (number >= 1000000) {
+    const millions = number / 1000000;
+    return `${millions >= 10 ? millions.toFixed(0) : millions.toFixed(1).replace(/\.0$/, "")}M`;
+  }
+
+  if (number >= 1000) {
+    const thousands = number / 1000;
+
+    if (thousands >= 100) {
+      return `${thousands.toFixed(0)}k`;
     }
 
-    if (number >= 1000000) {
-        const millions = number / 1000000;
-        return `${millions >= 10 ? millions.toFixed(0) : millions.toFixed(1).replace(/\.0$/, "")}M`;
-    }
+    return `${thousands.toFixed(1).replace(/\.0$/, "")}k`;
+  }
 
-    if (number >= 1000) {
-        const thousands = number / 1000;
-
-        if (thousands >= 100) {
-            return `${thousands.toFixed(0)}k`;
-        }
-
-        return `${thousands.toFixed(1).replace(/\.0$/, "")}k`;
-    }
-
-    return String(Math.round(number));
+  return String(Math.round(number));
 };
 
-
-const normalizeDomain = domain => {
+/* const normalizeDomain = domain => {
 
     return String(domain || "")
         .trim()
@@ -63,34 +62,37 @@ const normalizeDomain = domain => {
         .split("/")[0]
         .split(":")[0]
         .replace(/^\*\./, "");
+}; */
+const normalizeDomain = (domain) => {
+  return String(domain || "")
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .split("/")[0]
+    .split(":")[0];
 };
 
+const addDomainToList = async (domain) => {
+  const normalizedDomain = normalizeDomain(domain);
 
-const addDomainToList = async domain => {
-    const normalizedDomain = normalizeDomain(domain);
+  if (!normalizedDomain) {
+    return false;
+  }
 
-    if (!normalizedDomain) {
-        return false;
-    }
+  const data = await chrome.storage.local.get({
+    blockedDomains: [],
+  });
 
-    const data = await chrome.storage.local.get({
-        blockedDomains: []
-    });
+  if (data.blockedDomains.includes(normalizedDomain)) {
+    return false;
+  }
 
-    if (data.blockedDomains.includes(normalizedDomain)) {
-        return false;
-    }
+  await chrome.storage.local.set({
+    blockedDomains: [...data.blockedDomains, normalizedDomain],
+  });
 
-    await chrome.storage.local.set({
-        blockedDomains: [
-            ...data.blockedDomains,
-            normalizedDomain
-        ]
-    });
-
-    return true;
-}
-
+  return true;
+};
 
 /*
  * ---------------------------------------------------------
@@ -99,34 +101,24 @@ const addDomainToList = async domain => {
  */
 
 const load = async () => {
+  applyTheme(getThemePreference());
 
-    applyTheme(getThemePreference());
+  const data = await chrome.storage.local.get({
+    blockedDomains: DEFAULT_DOMAINS,
 
-    const data =
-        await chrome.storage.local.get({
+    totalBlocked: 0,
 
-            blockedDomains:
-                DEFAULT_DOMAINS,
+    blockedByDomain: {},
 
-            totalBlocked:
-                0,
+    lastBlocked: null,
 
-            blockedByDomain:
-                {},
+    lastBlockedDomain: null,
+  });
 
-            lastBlocked:
-                null,
+  renderDomains(data.blockedDomains);
 
-            lastBlockedDomain:
-                null
-        });
-
-
-    renderDomains(data.blockedDomains);
-
-    renderStats(data);
-}
-
+  renderStats(data);
+};
 
 /*
  * ---------------------------------------------------------
@@ -134,72 +126,50 @@ const load = async () => {
  * ---------------------------------------------------------
  */
 
-const renderDomains = domains => {
+const renderDomains = (domains) => {
+  const container = document.getElementById("domains");
 
-    const container =
-        document.getElementById("domains");
+  container.innerHTML = "";
 
-    container.innerHTML = "";
+  domains.forEach((domain) => {
+    const row = document.createElement("div");
 
+    row.className = "domain";
 
-    domains.forEach(domain => {
+    const name = document.createElement("span");
 
-        const row =
-            document.createElement("div");
+    name.className = "domain-name";
 
-        row.className = "domain";
+    name.textContent = domain;
 
+    const button = document.createElement("button");
 
-        const name =
-            document.createElement("span");
+    button.className = "remove";
 
-        name.className = "domain-name";
+    button.textContent = "Remove";
 
-        name.textContent = domain;
+    button.addEventListener("click", async () => {
+      const data = await chrome.storage.local.get({
+        blockedDomains: [],
+      });
 
+      const updated = data.blockedDomains.filter((d) => d !== domain);
 
-        const button =
-            document.createElement("button");
+      await chrome.storage.local.set({
+        blockedDomains: updated,
+      });
 
-        button.className = "remove";
+      showMessage(`Removed ${domain}`);
 
-        button.textContent = "Remove";
-
-
-        button.addEventListener(
-            "click",
-            async () => {
-
-                const data =
-                    await chrome.storage.local.get({
-                        blockedDomains: []
-                    });
-
-                const updated =
-                    data.blockedDomains.filter(
-                        d => d !== domain
-                    );
-
-                await chrome.storage.local.set({
-                    blockedDomains: updated
-                });
-
-                showMessage(
-                    `Removed ${domain}`
-                );
-
-                load();
-            }
-        );
-
-
-        row.appendChild(name);
-        row.appendChild(button);
-
-        container.appendChild(row);
+      load();
     });
-}
 
+    row.appendChild(name);
+    row.appendChild(button);
+
+    container.appendChild(row);
+  });
+};
 
 /*
  * ---------------------------------------------------------
@@ -207,57 +177,41 @@ const renderDomains = domains => {
  * ---------------------------------------------------------
  */
 
-document
-    .getElementById("themeToggle")
-    .addEventListener("click", () => {
-        const nextTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+document.getElementById("themeToggle").addEventListener("click", () => {
+  const nextTheme =
+    document.documentElement.getAttribute("data-theme") === "dark"
+      ? "light"
+      : "dark";
 
-        localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
-        applyTheme(nextTheme);
-    });
+  localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+  applyTheme(nextTheme);
+});
 
+document.getElementById("addDomain").addEventListener("click", async () => {
+  const input = document.getElementById("domainInput");
 
-document
-    .getElementById("addDomain")
-    .addEventListener("click", async () => {
+  const domain = normalizeDomain(input.value);
 
-        const input =
-            document.getElementById("domainInput");
+  if (!domain) {
+    showMessage("Please enter a domain.");
 
-        const domain =
-            normalizeDomain(input.value);
+    return;
+  }
 
+  const alreadyExists = await addDomainToList(domain);
 
-        if (!domain) {
+  if (!alreadyExists) {
+    showMessage("That domain is already blocked.");
 
-            showMessage(
-                "Please enter a domain."
-            );
+    return;
+  }
 
-            return;
-        }
+  input.value = "";
 
-        const alreadyExists =
-            await addDomainToList(domain);
+  showMessage(`Added ${domain}`);
 
-        if (!alreadyExists) {
-            showMessage(
-                "That domain is already blocked."
-            );
-
-            return;
-        }
-
-
-        input.value = "";
-
-        showMessage(
-            `Added ${domain}`
-        );
-
-        load();
-    });
-
+  load();
+});
 
 /*
  * ---------------------------------------------------------
@@ -265,18 +219,11 @@ document
  * ---------------------------------------------------------
  */
 
-document
-    .getElementById("domainInput")
-    .addEventListener("keydown", event => {
-
-        if (event.key === "Enter") {
-
-            document
-                .getElementById("addDomain")
-                .click();
-        }
-    });
-
+document.getElementById("domainInput").addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    document.getElementById("addDomain").click();
+  }
+});
 
 /*
  * ---------------------------------------------------------
@@ -284,104 +231,75 @@ document
  * ---------------------------------------------------------
  */
 
-const renderStats = data => {
+const renderStats = (data) => {
+  document.getElementById("totalBlocked").textContent = formatCompactNumber(
+    data.totalBlocked || 0,
+  );
 
-    document
-        .getElementById("totalBlocked")
-        .textContent =
-            formatCompactNumber(data.totalBlocked || 0);
+  const last = document.getElementById("lastBlocked");
 
+  const lastDomainText = document.getElementById("lastBlockedDomainText");
 
-    const last =
-        document.getElementById("lastBlocked");
+  lastDomainText.textContent = "";
 
-    const lastDomainText =
-        document.getElementById("lastBlockedDomainText");
+  if (data.lastBlocked && data.lastBlockedDomain) {
+    const date = new Date(data.lastBlocked);
 
+    last.textContent = `Last blocked: ${date.toLocaleString()}`;
 
-    lastDomainText.textContent = "";
+    const label = document.createElement("span");
 
-    if (
-        data.lastBlocked &&
-        data.lastBlockedDomain
-    ) {
+    label.textContent = "Last blocked domain: ";
 
-        const date =
-            new Date(data.lastBlocked);
+    lastDomainText.appendChild(label);
 
+    const domain = normalizeDomain(data.lastBlockedDomain);
 
-        last.textContent =
-            `Last blocked: ${date.toLocaleString()}`;
+    if (data.blockedDomains.includes(domain)) {
+      const value = document.createElement("span");
 
-        const label =
-            document.createElement("span");
-
-        label.textContent = "Last blocked domain: ";
-
-        lastDomainText.appendChild(label);
-
-        const domain = normalizeDomain(data.lastBlockedDomain);
-
-        if (data.blockedDomains.includes(domain)) {
-            const value =
-                document.createElement("span");
-
-            value.textContent = domain;
-            lastDomainText.appendChild(value);
-        } else {
-            const button =
-                document.createElement("button");
-
-            button.type = "button";
-            button.className = "clickable-domain";
-            button.textContent = domain;
-
-            button.addEventListener("click", async () => {
-                const added = await addDomainToList(domain);
-
-                if (added) {
-                    showMessage(`Added ${domain}`);
-                    load();
-                }
-            });
-
-            lastDomainText.appendChild(button);
-        }
-
+      value.textContent = domain;
+      lastDomainText.appendChild(value);
     } else {
+      const button = document.createElement("button");
 
-        last.textContent =
-            "No blocks recorded yet.";
+      button.type = "button";
+      button.className = "clickable-domain";
+      button.textContent = domain;
 
-        lastDomainText.textContent =
-            "Last blocked domain: none";
+      button.addEventListener("click", async () => {
+        const added = await addDomainToList(domain);
+
+        if (added) {
+          showMessage(`Added ${domain}`);
+          load();
+        }
+      });
+
+      lastDomainText.appendChild(button);
     }
+  } else {
+    last.textContent = "No blocks recorded yet.";
 
+    lastDomainText.textContent = "Last blocked domain: none";
+  }
 
-    const stats =
-        document.getElementById("domainStats");
+  const stats = document.getElementById("domainStats");
 
-    stats.innerHTML = "";
+  stats.innerHTML = "";
 
+  const byDomain = data.blockedByDomain || {};
 
-    const byDomain =
-        data.blockedByDomain || {};
+  Object.entries(byDomain)
+    .sort((a, b) => b[1] - a[1])
+    .forEach(([domain, count]) => {
+      const row = document.createElement("div");
 
+      row.textContent = `${domain}: ${formatCompactNumber(count)}`;
 
-    Object.entries(byDomain)
-        .sort((a, b) => b[1] - a[1])
-        .forEach(([domain, count]) => {
-
-            const row =
-                document.createElement("div");
-
-            row.textContent =
-                `${domain}: ${formatCompactNumber(count)}`;
-
-            stats.appendChild(row);
-        });
-}
-
+      stats.appendChild(row);
+    });
+};
 
 /*
  * ---------------------------------------------------------
@@ -389,29 +307,21 @@ const renderStats = data => {
  * ---------------------------------------------------------
  */
 
-document
-    .getElementById("resetStats")
-    .addEventListener("click", async () => {
+document.getElementById("resetStats").addEventListener("click", async () => {
+  await chrome.storage.local.set({
+    totalBlocked: 0,
 
-        await chrome.storage.local.set({
+    blockedByDomain: {},
 
-            totalBlocked: 0,
+    lastBlocked: null,
 
-            blockedByDomain: {},
+    lastBlockedDomain: null,
+  });
 
-            lastBlocked: null,
+  showMessage("Counters reset.");
 
-            lastBlockedDomain: null
-        });
-
-
-        showMessage(
-            "Counters reset."
-        );
-
-        load();
-    });
-
+  load();
+});
 
 /*
  * ---------------------------------------------------------
@@ -419,17 +329,14 @@ document
  * ---------------------------------------------------------
  */
 
-const showMessage = text => {
+const showMessage = (text) => {
+  const element = document.getElementById("message");
 
-    const element =
-        document.getElementById("message");
+  element.textContent = text;
 
-    element.textContent = text;
-
-    setTimeout(() => {
-        element.textContent = "";
-    }, 2500);
-}
-
+  setTimeout(() => {
+    element.textContent = "";
+  }, 2500);
+};
 
 load();
