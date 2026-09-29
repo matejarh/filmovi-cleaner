@@ -67,11 +67,11 @@
           const baseDomain = domain.slice(2);
 
           if (hostname === baseDomain || hostname.endsWith("." + baseDomain)) {
-            return domain;
+            return hostname;
           }
         } else {
           if (hostname === domain || hostname.endsWith("." + domain)) {
-            return domain;
+            return hostname;
           }
         }
       }

@@ -16,7 +16,7 @@
     "default_popup": "popup.html"
   },
 
-  "permissions": ["storage", "declarativeNetRequest"],
+  "permissions": ["storage", "declarativeNetRequest", "declarativeNetRequestFeedback"],
 
   "host_permissions": ["*://*.filmoviplex.com/*", "*://*.remitalamends.qpon/*", "*://*.qpon/*"],
 

@@ -135,6 +135,26 @@ const recordBlock = async (domain) => {
   await updateBadge();
 };
 
+let blockQueue = Promise.resolve();
+
+const queueBlock = (domain) => {
+  blockQueue = blockQueue
+    .then(() => recordBlock(domain))
+    .catch((error) => console.error("Could not record blocked domain:", error));
+};
+
+chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((info) => {
+  if (!info.request?.url) {
+    return;
+  }
+
+  try {
+    queueBlock(new URL(info.request.url).hostname);
+  } catch {
+    // Ignore malformed request URLs.
+  }
+});
+
 /*
  * ---------------------------------------------------------
  * Badge
@@ -165,7 +185,7 @@ const updateBadge = async () => {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "BLOCKED") {
-    recordBlock(normalizeDomain(message.domain));
+    queueBlock(normalizeDomain(message.domain));
 
     return;
   }
