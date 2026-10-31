@@ -1,16 +1,5 @@
-const formatNumber = value => {
-    const number = Number(value || 0);
-
-    if (!Number.isFinite(number)) {
-        return "0";
-    }
-
-    return new Intl.NumberFormat().format(number);
-};
-
-
 const renderStats = data => {
-    document.getElementById("totalBlocked").textContent = formatNumber(data.totalBlocked);
+    document.getElementById("totalBlocked").textContent = formatCompactNumber(data.totalBlocked);
 
     const lastBlocked = document.getElementById("lastBlocked");
 
@@ -50,7 +39,7 @@ const renderStats = data => {
 
         const value = document.createElement("span");
         value.className = "domain-count";
-        value.textContent = formatNumber(count);
+        value.textContent = formatCompactNumber(count);
 
         row.append(name, value);
         domainStats.appendChild(row);

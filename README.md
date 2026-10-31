@@ -28,6 +28,7 @@ This extension:
 - `background.js` — background service worker that stores settings and applies dynamic network rules
 - `blocker.js` — main-world script that watches page traffic and reports blocked content
 - `bridge.js` — isolated-world bridge that relays messages from the page to the extension
+- `format.js` — shared compact number formatter (e.g. `1k2`) used by the badge, popup, and options page
 - `popup.html` — toolbar popup that displays the extension icon and blocking statistics
 - `popup.js` — popup statistics and options-page launcher logic
 - `options.html` — extension settings page
@@ -83,4 +84,4 @@ The extension starts with this domain blocked by default:
 ## Notes
 
 - The extension uses Chrome extension APIs such as `chrome.storage` and `chrome.declarativeNetRequest`.
-- The options page keeps compact stats like `1k`, `1.1k`, and `1M` for large numbers.
+- The toolbar badge, popup, and options page all show compact counts like `1k`, `1k1`, and `1M` for large numbers.

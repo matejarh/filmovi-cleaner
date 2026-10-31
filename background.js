@@ -1,3 +1,5 @@
+importScripts("format.js");
+
 const DEFAULT_DOMAINS = ["remitalamends.qpon"];
 
 const RULE_ID_BASE = 1000;
@@ -169,7 +171,7 @@ const updateBadge = async () => {
   const count = Number(data.totalBlocked) || 0;
 
   await chrome.action.setBadgeText({
-    text: count > 0 ? String(count) : "",
+    text: count > 0 ? formatCompactNumber(count) : "",
   });
 
   await chrome.action.setBadgeBackgroundColor({

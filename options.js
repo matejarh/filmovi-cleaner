@@ -28,30 +28,6 @@ const applyTheme = (theme) => {
   }
 };
 
-const formatCompactNumber = (value) => {
-  const number = Number(value || 0);
-
-  if (!Number.isFinite(number) || number === 0) {
-    return "0";
-  }
-
-  if (number >= 1000000) {
-    const millions = number / 1000000;
-    return `${millions >= 10 ? millions.toFixed(0) : millions.toFixed(1).replace(/\.0$/, "")}M`;
-  }
-
-  if (number >= 1000) {
-    const thousands = number / 1000;
-
-    if (thousands >= 100) {
-      return `${thousands.toFixed(0)}k`;
-    }
-
-    return `${thousands.toFixed(1).replace(/\.0$/, "")}k`;
-  }
-
-  return String(Math.round(number));
-};
 
 /* const normalizeDomain = domain => {
 
