@@ -127,6 +127,14 @@
             white-space: nowrap;
         }
 
+        select {
+            padding: 6px 8px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            background: var(--input-bg);
+            color: var(--text);
+        }
+
         input {
             padding: 9px;
             width: 300px;
@@ -218,6 +226,18 @@
 
         <p class="muted" id="lastBlocked">
             No blocks recorded yet.
+        </p>
+
+        <p class="muted">
+            Date format:
+            <select id="dateLocale">
+                <option value="">Browser default</option>
+                <option value="sl-SI">Slovenian (sl-SI)</option>
+                <option value="hr-HR">Croatian (hr-HR)</option>
+                <option value="en-GB">English UK (en-GB)</option>
+                <option value="en-US">English US (en-US)</option>
+                <option value="de-DE">German (de-DE)</option>
+            </select>
         </p>
 
         <p class="muted" id="lastBlockedDomainText">

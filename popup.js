@@ -8,7 +8,7 @@ const renderStats = data => {
         lastBlocked.textContent = "";
 
         const dateLabel = document.createElement("strong");
-        dateLabel.textContent = date.toLocaleString();
+        dateLabel.textContent = formatDateTime(data.lastBlocked, data.dateLocale);
 
         const domainLabel = document.createElement("strong");
         domainLabel.textContent = data.lastBlockedDomain;
@@ -51,7 +51,8 @@ chrome.storage.local.get({
     totalBlocked: 0,
     blockedByDomain: {},
     lastBlocked: null,
-    lastBlockedDomain: null
+    lastBlockedDomain: null,
+    dateLocale: ""
 }).then(renderStats);
 
 

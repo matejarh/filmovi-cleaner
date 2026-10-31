@@ -82,6 +82,8 @@ const load = async () => {
   const data = await chrome.storage.local.get({
     blockedDomains: DEFAULT_DOMAINS,
 
+    dateLocale: "",
+
     totalBlocked: 0,
 
     blockedByDomain: {},
@@ -90,6 +92,8 @@ const load = async () => {
 
     lastBlockedDomain: null,
   });
+
+  document.getElementById("dateLocale").value = data.dateLocale;
 
   renderDomains(data.blockedDomains);
 
@@ -221,7 +225,7 @@ const renderStats = (data) => {
   if (data.lastBlocked && data.lastBlockedDomain) {
     const date = new Date(data.lastBlocked);
 
-    last.textContent = `Last blocked: ${date.toLocaleString()}`;
+    last.textContent = `Last blocked: ${formatDateTime(data.lastBlocked, data.dateLocale)}`;
 
     const label = document.createElement("span");
 
@@ -276,6 +280,18 @@ const renderStats = (data) => {
       stats.appendChild(row);
     });
 };
+
+/*
+ * ---------------------------------------------------------
+ * Date format
+ * ---------------------------------------------------------
+ */
+
+document.getElementById("dateLocale").addEventListener("change", async (event) => {
+  await chrome.storage.local.set({ dateLocale: event.target.value });
+
+  load();
+});
 
 /*
  * ---------------------------------------------------------

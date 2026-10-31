@@ -26,6 +26,15 @@
 
   "options_page": "options.html",
 
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+F"
+      },
+      "description": "Open FilmoviPlex Cleaner popup"
+    }
+  },
+
   "content_scripts": [
     {
       "matches": ["*://filmoviplex.com/*", "*://*.filmoviplex.com/*"],

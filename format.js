@@ -26,3 +26,6 @@ const formatCompactNumber = (value) => {
     }
   }
 };
+
+const formatDateTime = (value, locale) =>
+  new Date(value).toLocaleString(locale || navigator.languages, { dateStyle: "medium", timeStyle: "medium" });
