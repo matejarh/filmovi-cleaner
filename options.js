@@ -87,6 +87,11 @@ const addDomainToList = async (domain) => {
  * ---------------------------------------------------------
  */
 
+const setBlockingState = (enabled) => {
+  document.getElementById("blockingEnabled").checked = enabled;
+  document.getElementById("blockingStatus").textContent = enabled ? "Blocking enabled" : "Blocking disabled";
+};
+
 const load = async () => {
   applyTheme(getThemePreference());
 
@@ -105,7 +110,7 @@ const load = async () => {
     blockingEnabled: true,
   });
 
-  document.getElementById("blockingEnabled").checked = data.blockingEnabled;
+  setBlockingState(data.blockingEnabled);
   document.getElementById("dateLocale").value = data.dateLocale;
 
   renderDomains(data.blockedDomains);
@@ -181,6 +186,7 @@ document.getElementById("themeToggle").addEventListener("click", () => {
 });
 
 document.getElementById("blockingEnabled").addEventListener("change", async (event) => {
+  setBlockingState(event.target.checked);
   await chrome.storage.local.set({ blockingEnabled: event.target.checked });
 });
 

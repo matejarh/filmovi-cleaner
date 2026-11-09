@@ -156,8 +156,42 @@
         }
 
         .blocking-toggle input {
-            width: auto;
+            appearance: none;
+            position: relative;
+            flex: 0 0 40px;
+            width: 40px;
+            height: 22px;
             margin: 0;
+            padding: 0;
+            border: 0;
+            border-radius: 11px;
+            background: #c62828;
+            cursor: pointer;
+        }
+
+        .blocking-toggle input::before {
+            content: "";
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            transition: transform 0.15s ease;
+        }
+
+        .blocking-toggle input:checked {
+            background: #218739;
+        }
+
+        .blocking-toggle input:checked::before {
+            transform: translateX(18px);
+        }
+
+        .blocking-toggle input:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 3px;
         }
 
         .stats {
@@ -208,8 +242,8 @@
     </div>
 
     <label class="blocking-toggle">
-        <input id="blockingEnabled" type="checkbox" checked>
-        Blocking enabled
+        <input id="blockingEnabled" type="checkbox" role="switch" checked>
+        <span id="blockingStatus">Blocking enabled</span>
     </label>
 
     <p>

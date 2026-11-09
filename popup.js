@@ -1,7 +1,12 @@
+const setBlockingState = enabled => {
+    document.getElementById("blockingEnabled").checked = enabled;
+    document.getElementById("blockingStatus").textContent = enabled ? "Blocking enabled" : "Blocking disabled";
+};
+
 const renderStats = data => {
     document.getElementById("totalBlocked").textContent = formatCompactNumber(data.totalBlocked);
     document.getElementById("exactBlocked").textContent = `(${data.totalBlocked || 0})`;
-    document.getElementById("blockingEnabled").checked = data.blockingEnabled;
+    setBlockingState(data.blockingEnabled);
 
     const lastBlocked = document.getElementById("lastBlocked");
 
@@ -65,6 +70,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
 });
 
 document.getElementById("blockingEnabled").addEventListener("change", event => {
+    setBlockingState(event.target.checked);
     chrome.storage.local.set({ blockingEnabled: event.target.checked });
 });
 
