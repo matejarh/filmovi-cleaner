@@ -14,10 +14,10 @@ This extension:
 
 - blocks configured domains from loading on FilmoviPlex pages
 - catches popup traffic that standard browser shields and ad blockers can miss
-- tracks how many blocks occur
+- tracks page-level blocks and, when loaded unpacked, network-rule blocks
 - shows blocking statistics when the extension toolbar icon is clicked
 - shows the most recent blocked domain in the popup and options page
-- lets you add or remove blocked domains from the extension settings
+- lets you add or remove blocked domains and pause or resume blocking
 - follows the browser's light or dark theme automatically in the popup
 - supports dark and light theme in the options screen
 
@@ -50,8 +50,10 @@ This extension is intended for Chromium-based browsers that support Manifest V3 
 
 1. Click the FilmoviPlex Cleaner icon in the browser toolbar to view blocked-popup statistics.
 2. Use **Manage domains** in the popup to open the extension options page.
-3. Add or remove domains in the extension options page.
+3. Add or remove domains in the extension options page. Full HTTP(S) URLs are accepted and normalized to their domain; subdomains are included.
 4. Visit FilmoviPlex pages and the extension will automatically block matching popup traffic.
+
+Use **Blocking enabled** in the popup or options page to pause or resume blocking. Domain and pause changes are sent to open FilmoviPlex frames automatically. Resetting statistics requires confirmation.
 
 The toolbar popup follows the browser's light or dark appearance automatically. It does not have a theme button.
 
@@ -85,3 +87,5 @@ The extension starts with this domain blocked by default:
 
 - The extension uses Chrome extension APIs such as `chrome.storage` and `chrome.declarativeNetRequest`.
 - The toolbar badge, popup, and options page all show compact counts like `1k`, `1k1`, and `1M` for large numbers.
+- Network rules apply to requests initiated by FilmoviPlex and its subdomains. Requests initiated by third-party frames are not covered by those rules.
+- Counts include blocked network requests as well as popups. Chrome only reports individual network-rule matches to unpacked extensions, so packaged extensions can show partial counts.

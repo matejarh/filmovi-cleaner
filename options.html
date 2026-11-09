@@ -148,6 +148,18 @@
             color: var(--muted);
         }
 
+        .blocking-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .blocking-toggle input {
+            width: auto;
+            margin: 0;
+        }
+
         .stats {
             margin-top: 30px;
             padding-top: 20px;
@@ -195,6 +207,11 @@
         <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">🌙 Dark</button>
     </div>
 
+    <label class="blocking-toggle">
+        <input id="blockingEnabled" type="checkbox" checked>
+        Blocking enabled
+    </label>
+
     <p>
         Domains blocked by the extension:
     </p>
@@ -207,6 +224,7 @@
             id="domainInput"
             type="text"
             placeholder="example.com"
+            aria-label="Domain or URL to block"
         >
 
         <button class="add" id="addDomain">
@@ -215,7 +233,7 @@
 
     </div>
 
-    <div id="message"></div>
+    <div id="message" role="status" aria-live="polite"></div>
 
 
     <div class="stats">
@@ -227,8 +245,10 @@
         </div>
 
         <div>
-            blocked popups
+            blocked requests and popups
         </div>
+
+        <p class="muted">Network blocks are counted only when the extension is loaded unpacked.</p>
 
         <p class="muted" id="lastBlocked">
             No blocks recorded yet.

@@ -3,7 +3,7 @@
 
   const PREFIX = "[FilmoviPlex Cleaner]";
 
-  let blockedDomains = ["remitalamends.qpon"];
+  let blockedDomains = [];
 
   /*
    * ---------------------------------------------------------
@@ -117,7 +117,7 @@
     }
 
     if (data.type === "SET_DOMAINS" && Array.isArray(data.domains)) {
-      blockedDomains = data.domains.map(normalizeDomain).filter(Boolean);
+      blockedDomains = data.enabled ? data.domains.map(normalizeDomain).filter(Boolean) : [];
 
       console.log(PREFIX, "Updated domains:", blockedDomains);
     }

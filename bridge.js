@@ -50,25 +50,32 @@
      * Ask background for current settings.
      */
 
-    safeSendMessage({
-        type: "GET_DOMAINS"
-    }, response => {
-
-        if (!response) {
-            return;
-        }
-
+    let settingsVersion = 0;
+    const refreshSettings = async () => {
+        const version = ++settingsVersion;
         try {
+            const settings = await chrome.storage.local.get({
+                blockedDomains: ["remitalamends.qpon"],
+                blockingEnabled: true
+            });
+            if (version !== settingsVersion) return;
             window.postMessage({
                 source: "filmoviPlexCleanerExtension",
                 type: "SET_DOMAINS",
-                domains: response.domains
+                domains: settings.blockedDomains,
+                enabled: settings.blockingEnabled
             }, "*");
         } catch (error) {
             if (!(error && error.message && error.message.includes("Extension context invalidated"))) {
-                console.warn(`${PREFIX} Unable to post domains`, error);
+                console.warn(`${PREFIX} Unable to update settings`, error);
             }
+        }
+    };
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === "local" && (changes.blockedDomains || changes.blockingEnabled)) {
+            refreshSettings();
         }
     });
 
+    refreshSettings();
 })();

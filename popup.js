@@ -1,6 +1,7 @@
 const renderStats = data => {
     document.getElementById("totalBlocked").textContent = formatCompactNumber(data.totalBlocked);
     document.getElementById("exactBlocked").textContent = `(${data.totalBlocked || 0})`;
+    document.getElementById("blockingEnabled").checked = data.blockingEnabled;
 
     const lastBlocked = document.getElementById("lastBlocked");
 
@@ -48,14 +49,24 @@ const renderStats = data => {
 };
 
 
-chrome.storage.local.get({
+const loadStats = () => chrome.storage.local.get({
     totalBlocked: 0,
     blockedByDomain: {},
     lastBlocked: null,
     lastBlockedDomain: null,
-    dateLocale: ""
+    dateLocale: "",
+    blockingEnabled: true
 }).then(renderStats);
 
+loadStats();
+
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === "local" && (changes.totalBlocked || changes.blockingEnabled)) loadStats();
+});
+
+document.getElementById("blockingEnabled").addEventListener("change", event => {
+    chrome.storage.local.set({ blockingEnabled: event.target.checked });
+});
 
 document.getElementById("openOptions").addEventListener("click", () => {
     chrome.runtime.openOptionsPage();

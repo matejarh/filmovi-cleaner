@@ -91,6 +91,18 @@
             font-size: 12px;
         }
 
+        .blocking-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 14px;
+            font-size: 12px;
+        }
+
+        .blocking-toggle input {
+            margin: 0;
+        }
+
         .details {
             margin: 14px 0 0;
             color: var(--muted);
@@ -184,10 +196,14 @@
 
     <main>
         <div class="total">
-            <div class="total-label">Blocked popups</div>
+            <div class="total-label">Blocked requests and popups</div>
             <div class="total-number" id="totalBlocked">0</div>
             <div class="exact-count" id="exactBlocked">(0)</div>
             <div class="details" id="lastBlocked">No blocks recorded yet.</div>
+            <label class="blocking-toggle">
+                <input id="blockingEnabled" type="checkbox" checked>
+                Blocking enabled
+            </label>
         </div>
 
         <section>

@@ -65,6 +65,7 @@ const updateRules = async (domains) => {
     },
 
     condition: {
+      initiatorDomains: ["filmoviplex.com"],
       requestDomains: [domain],
 
       resourceTypes: [
@@ -90,15 +91,8 @@ const updateRules = async (domains) => {
  */
 
 const initialize = async () => {
-  let domains = await getDomains();
-
-  await chrome.storage.local.set({
-    blockedDomains: domains,
-  });
-
-  await updateRules(domains);
-
-  await updateBadge();
+  await refreshRules();
+  await refreshBadge();
 };
 
 /*
@@ -134,18 +128,19 @@ const recordBlock = async (domain) => {
     lastBlockedDomain: domain,
   });
 
-  await updateBadge();
 };
 
 let blockQueue = Promise.resolve();
 
-const queueBlock = (domain) => {
-  blockQueue = blockQueue
-    .then(() => recordBlock(domain))
-    .catch((error) => console.error("Could not record blocked domain:", error));
+const queueStats = (operation) => {
+  const task = blockQueue.then(operation);
+  blockQueue = task.catch((error) => console.error("Could not update statistics:", error));
+  return task;
 };
 
-chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((info) => {
+const queueBlock = (domain) => queueStats(() => recordBlock(domain)).catch(() => {});
+
+chrome.declarativeNetRequest.onRuleMatchedDebug?.addListener((info) => {
   if (!info.request?.url) {
     return;
   }
@@ -166,17 +161,36 @@ chrome.declarativeNetRequest.onRuleMatchedDebug.addListener((info) => {
 const updateBadge = async () => {
   const data = await chrome.storage.local.get({
     totalBlocked: 0,
+    blockingEnabled: true,
   });
 
   const count = Number(data.totalBlocked) || 0;
 
   await chrome.action.setBadgeText({
-    text: count > 0 ? formatCompactNumber(count) : "",
+    text: data.blockingEnabled ? (count > 0 ? formatCompactNumber(count) : "") : "OFF",
   });
 
   await chrome.action.setBadgeBackgroundColor({
     color: "#d93025",
   });
+};
+
+let badgeQueue = Promise.resolve();
+const refreshBadge = () => {
+  badgeQueue = badgeQueue.then(updateBadge).catch(console.error);
+  return badgeQueue;
+};
+
+let ruleQueue = Promise.resolve();
+const refreshRules = () => {
+  ruleQueue = ruleQueue.then(async () => {
+    const data = await chrome.storage.local.get({
+      blockedDomains: DEFAULT_DOMAINS,
+      blockingEnabled: true,
+    });
+    await updateRules(data.blockingEnabled ? data.blockedDomains.map(normalizeDomain).filter(Boolean) : []);
+  }).catch(console.error);
+  return ruleQueue;
 };
 
 /*
@@ -187,9 +201,22 @@ const updateBadge = async () => {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "BLOCKED") {
-    queueBlock(normalizeDomain(message.domain));
+    const domain = normalizeDomain(message.domain);
+    if (domain && sender.url && /^https?:\/\/(?:[^/]+\.)?filmoviplex\.com(?::\d+)?(?:\/|$)/i.test(sender.url)) {
+      queueBlock(domain);
+    }
 
     return;
+  }
+
+  if (message.type === "RESET_STATS" && !sender.tab) {
+    queueStats(() => chrome.storage.local.set({
+      totalBlocked: 0,
+      blockedByDomain: {},
+      lastBlocked: null,
+      lastBlockedDomain: null,
+    })).then(() => sendResponse({ ok: true }), () => sendResponse({ ok: false }));
+    return true;
   }
 
   if (message.type === "GET_DOMAINS") {
@@ -217,14 +244,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
  * ---------------------------------------------------------
  */
 
-chrome.storage.onChanged.addListener(async (changes, area) => {
-  if (area !== "local" || !changes.blockedDomains) {
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== "local") {
     return;
   }
 
-  const domains = changes.blockedDomains.newValue || [];
-
-  await updateRules(domains);
+  if (changes.blockedDomains || changes.blockingEnabled) {
+    refreshRules();
+  }
+  if (changes.totalBlocked || changes.blockingEnabled) {
+    refreshBadge();
+  }
 });
 
 /*

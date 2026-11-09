@@ -40,12 +40,23 @@ const applyTheme = (theme) => {
         .replace(/^\*\./, "");
 }; */
 const normalizeDomain = (domain) => {
-  return String(domain || "")
-    .trim()
-    .toLowerCase()
-    .replace(/^https?:\/\//, "")
-    .split("/")[0]
-    .split(":")[0];
+  const input = String(domain || "").trim().replace(/^\*\./, "");
+  if (!input) return "";
+
+  try {
+    const url = new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(input) ? input : `https://${input}`);
+    const hostname = url.hostname.toLowerCase().replace(/\.$/, "");
+    const labels = hostname.split(".");
+    if (!["http:", "https:"].includes(url.protocol) || url.username || url.password ||
+        labels.length < 2 || hostname.length > 253 ||
+        labels.some((label) => !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label)) ||
+        !/^(?:[a-z]{2,}|xn--[a-z0-9-]+)$/.test(labels[labels.length - 1])) {
+      return "";
+    }
+    return hostname;
+  } catch {
+    return "";
+  }
 };
 
 const addDomainToList = async (domain) => {
@@ -59,7 +70,7 @@ const addDomainToList = async (domain) => {
     blockedDomains: [],
   });
 
-  if (data.blockedDomains.includes(normalizedDomain)) {
+  if (data.blockedDomains.some((item) => normalizeDomain(item) === normalizedDomain)) {
     return false;
   }
 
@@ -91,8 +102,10 @@ const load = async () => {
     lastBlocked: null,
 
     lastBlockedDomain: null,
+    blockingEnabled: true,
   });
 
+  document.getElementById("blockingEnabled").checked = data.blockingEnabled;
   document.getElementById("dateLocale").value = data.dateLocale;
 
   renderDomains(data.blockedDomains);
@@ -167,13 +180,17 @@ document.getElementById("themeToggle").addEventListener("click", () => {
   applyTheme(nextTheme);
 });
 
+document.getElementById("blockingEnabled").addEventListener("change", async (event) => {
+  await chrome.storage.local.set({ blockingEnabled: event.target.checked });
+});
+
 document.getElementById("addDomain").addEventListener("click", async () => {
   const input = document.getElementById("domainInput");
 
   const domain = normalizeDomain(input.value);
 
   if (!domain) {
-    showMessage("Please enter a domain.");
+    showMessage("Enter a valid domain or HTTP(S) URL.");
 
     return;
   }
@@ -188,7 +205,7 @@ document.getElementById("addDomain").addEventListener("click", async () => {
 
   input.value = "";
 
-  showMessage(`Added ${domain}`);
+  showMessage(`Added ${domain} and its subdomains.`);
 
   load();
 });
@@ -236,7 +253,10 @@ const renderStats = (data) => {
 
     const domain = normalizeDomain(data.lastBlockedDomain);
 
-    if (data.blockedDomains.includes(domain)) {
+    if (data.blockedDomains.some((item) => {
+      const blockedDomain = normalizeDomain(item);
+      return blockedDomain && (domain === blockedDomain || domain.endsWith(`.${blockedDomain}`));
+    })) {
       const value = document.createElement("span");
 
       value.textContent = domain;
@@ -301,15 +321,15 @@ document.getElementById("dateLocale").addEventListener("change", async (event) =
  */
 
 document.getElementById("resetStats").addEventListener("click", async () => {
-  await chrome.storage.local.set({
-    totalBlocked: 0,
+  if (!window.confirm("Reset all blocking statistics? This cannot be undone.")) return;
 
-    blockedByDomain: {},
-
-    lastBlocked: null,
-
-    lastBlockedDomain: null,
-  });
+  try {
+    const result = await chrome.runtime.sendMessage({ type: "RESET_STATS" });
+    if (!result?.ok) throw new Error("Could not reset counters");
+  } catch {
+    showMessage("Could not reset counters.");
+    return;
+  }
 
   showMessage("Counters reset.");
 
@@ -331,5 +351,11 @@ const showMessage = (text) => {
     element.textContent = "";
   }, 2500);
 };
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && (changes.blockingEnabled || changes.totalBlocked || changes.blockedDomains)) {
+    load();
+  }
+});
 
 load();
