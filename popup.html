@@ -89,6 +89,7 @@
         .exact-count {
             color: var(--muted);
             font-size: 12px;
+            font-weight: normal;
         }
 
         .blocking-toggle {
@@ -231,8 +232,9 @@
     <main>
         <div class="total">
             <div class="total-label">Blocked requests and popups</div>
-            <div class="total-number" id="totalBlocked">0</div>
-            <div class="exact-count" id="exactBlocked">(0)</div>
+            <div class="total-number">
+                <span id="totalBlocked">0</span> <span class="exact-count" id="exactBlocked">(0)</span>
+            </div>
             <div class="details" id="lastBlocked">No blocks recorded yet.</div>
             <label class="blocking-toggle">
                 <input id="blockingEnabled" type="checkbox" role="switch" checked>

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "FilmoviPlex Cleaner",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "Blocks unwanted advertising popups on FilmoviPlex.",
 
   "icons": {
