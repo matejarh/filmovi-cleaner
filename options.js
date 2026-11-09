@@ -215,6 +215,7 @@ const renderStats = (data) => {
   document.getElementById("totalBlocked").textContent = formatCompactNumber(
     data.totalBlocked || 0,
   );
+  document.getElementById("exactBlocked").textContent = `(${data.totalBlocked || 0})`;
 
   const last = document.getElementById("lastBlocked");
 

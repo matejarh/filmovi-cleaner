@@ -159,6 +159,12 @@
             font-weight: bold;
         }
 
+        .exact-count {
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: normal;
+        }
+
         .muted {
             color: var(--muted);
         }
@@ -216,8 +222,8 @@
 
         <h2>Statistics</h2>
 
-        <div class="big-number" id="totalBlocked">
-            0
+        <div class="big-number">
+            <span id="totalBlocked">0</span> <span class="exact-count" id="exactBlocked">(0)</span>
         </div>
 
         <div>

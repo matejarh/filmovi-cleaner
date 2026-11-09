@@ -1,5 +1,6 @@
 const renderStats = data => {
     document.getElementById("totalBlocked").textContent = formatCompactNumber(data.totalBlocked);
+    document.getElementById("exactBlocked").textContent = `(${data.totalBlocked || 0})`;
 
     const lastBlocked = document.getElementById("lastBlocked");
 
