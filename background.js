@@ -65,7 +65,9 @@ const updateRules = async (domains) => {
     },
 
     condition: {
-      initiatorDomains: ["filmoviplex.com"],
+      // These are user-selected blocked destinations. Keep the rule effective
+      // for direct clicks and browser history navigations too, where Chromium
+      // may not report FilmoviPlex as the request initiator.
       requestDomains: [domain],
 
       resourceTypes: [

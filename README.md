@@ -12,7 +12,7 @@ This extension is specifically designed to block popup domains that often bypass
 
 This extension:
 
-- blocks configured domains from loading on FilmoviPlex pages
+- blocks configured domains from loading in the browser
 - catches popup traffic that standard browser shields and ad blockers can miss
 - tracks page-level blocks and, when loaded unpacked, network-rule blocks
 - shows blocking statistics when the extension toolbar icon is clicked
@@ -87,5 +87,5 @@ The extension starts with this domain blocked by default:
 
 - The extension uses Chrome extension APIs such as `chrome.storage` and `chrome.declarativeNetRequest`.
 - The toolbar badge, popup, and options page all show compact counts like `1k`, `1k1`, and `1M` for large numbers.
-- Network rules apply to requests initiated by FilmoviPlex and its subdomains. Requests initiated by third-party frames are not covered by those rules.
+- Network rules apply to configured destination domains across browser navigations, including links opened from third-party frames and history navigations.
 - Counts include blocked network requests as well as popups. Chrome only reports individual network-rule matches to unpacked extensions, so packaged extensions can show partial counts.

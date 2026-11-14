@@ -27,7 +27,9 @@
       .toLowerCase()
       .replace(/^https?:\/\//, "")
       .split("/")[0]
-      .split(":")[0];
+      .split(":")[0]
+      .replace(/^\*\./, "")
+      .replace(/^\.+|\.+$/g, "");
   };
 
   /*
@@ -79,6 +81,24 @@
 
     return null;
   };
+
+  // DNR remains the authoritative network block. Intercept ordinary links in
+  // the page as well so popup tabs cannot be opened before that request runs.
+  document.addEventListener("click", (event) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey ||
+        event.shiftKey || event.altKey) return;
+
+    const target = event.target instanceof Element ? event.target.closest("a[href]") : null;
+    if (!target || (target.target && target.target.toLowerCase() !== "_self")) return;
+
+    const domain = getBlockedDomain(target.href);
+    if (!domain) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    console.log(PREFIX, "BLOCKED LINK:", domain, target.href);
+    recordBlock(domain);
+  }, true);
 
   /*
    * ---------------------------------------------------------
