@@ -17,6 +17,8 @@ This extension:
 - tracks page-level blocks and, when loaded unpacked, network-rule blocks
 - shows blocking statistics when the extension toolbar icon is clicked
 - shows the most recent blocked domain in the popup and options page
+- keeps the last blocked domain as plain text and separately lists the last unblocked popup domain
+- lets you add the last unblocked popup domain to the blocked-domain list with one click
 - lets you add or remove blocked domains and pause or resume blocking
 - follows the browser's light or dark theme automatically in the popup
 - supports dark and light theme in the options screen
@@ -54,6 +56,8 @@ This extension is intended for Chromium-based browsers that support Manifest V3 
 4. Visit FilmoviPlex pages and the extension will automatically block matching popup traffic.
 
 Use **Blocking enabled** in the popup or options page to pause or resume blocking. Domain and pause changes are sent to open FilmoviPlex frames automatically. Resetting statistics requires confirmation.
+
+In the options page, the last blocked domain is displayed as plain text. When a popup opens on a domain that is not in the blocked-domain list, the **Last unblocked popup domain** line shows that domain and lets you add it with a click.
 
 The toolbar popup follows the browser's light or dark appearance automatically. It does not have a theme button.
 

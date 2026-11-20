@@ -89,7 +89,15 @@
         event.shiftKey || event.altKey) return;
 
     const target = event.target instanceof Element ? event.target.closest("a[href]") : null;
-    if (!target || (target.target && target.target.toLowerCase() !== "_self")) return;
+    if (!target) return;
+
+    if (target.target && target.target.toLowerCase() !== "_self") {
+      const popupDomain = normalizeDomain(target.href);
+      if (popupDomain && !getBlockedDomain(target.href)) {
+        recordPopup(popupDomain);
+      }
+      return;
+    }
 
     const domain = getBlockedDomain(target.href);
     if (!domain) return;
@@ -118,6 +126,21 @@
       );
     } catch (error) {
       console.error(PREFIX, "Could not report block:", error);
+    }
+  };
+
+  const recordPopup = (domain) => {
+    try {
+      window.postMessage(
+        {
+          source: "filmoviPlexCleaner",
+          type: "POPUP",
+          domain: domain,
+        },
+        "*",
+      );
+    } catch (error) {
+      console.error(PREFIX, "Could not report popup:", error);
     }
   };
 
@@ -211,6 +234,14 @@
       recordBlock(domain);
 
       return null;
+    }
+
+    let popupDomain = "";
+    try {
+      popupDomain = normalizeDomain(new URL(url, location.href).hostname);
+    } catch {}
+    if (popupDomain) {
+      recordPopup(popupDomain);
     }
 
     return originalOpen.call(this, url, target, features);

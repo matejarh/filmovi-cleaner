@@ -142,6 +142,23 @@ const queueStats = (operation) => {
 
 const queueBlock = (domain) => queueStats(() => recordBlock(domain)).catch(() => {});
 
+const recordPopup = async (domain) => {
+  const data = await chrome.storage.local.get({
+    blockedDomains: DEFAULT_DOMAINS,
+  });
+
+  const isBlocked = data.blockedDomains.some((item) => {
+    const blockedDomain = normalizeDomain(item);
+    return blockedDomain && (domain === blockedDomain || domain.endsWith(`.${blockedDomain}`));
+  });
+
+  if (!isBlocked) {
+    await chrome.storage.local.set({ lastPopupDomain: domain });
+  }
+};
+
+const queuePopup = (domain) => queueStats(() => recordPopup(domain)).catch(() => {});
+
 chrome.declarativeNetRequest.onRuleMatchedDebug?.addListener((info) => {
   if (!info.request?.url) {
     return;
@@ -211,12 +228,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return;
   }
 
+  if (message.type === "POPUP") {
+    const domain = normalizeDomain(message.domain);
+    if (domain && sender.url && /^https?:\/\/(?:[^/]+\.)?filmoviplex\.com(?::\d+)?(?:\/|$)/i.test(sender.url)) {
+      queuePopup(domain);
+    }
+
+    return;
+  }
+
   if (message.type === "RESET_STATS" && !sender.tab) {
     queueStats(() => chrome.storage.local.set({
       totalBlocked: 0,
       blockedByDomain: {},
       lastBlocked: null,
       lastBlockedDomain: null,
+      lastPopupDomain: null,
     })).then(() => sendResponse({ ok: true }), () => sendResponse({ ok: false }));
     return true;
   }

@@ -34,13 +34,13 @@
         if (
             !data ||
             data.source !== "filmoviPlexCleaner" ||
-            data.type !== "BLOCKED"
+            (data.type !== "BLOCKED" && data.type !== "POPUP")
         ) {
             return;
         }
 
         safeSendMessage({
-            type: "BLOCKED",
+            type: data.type,
             domain: data.domain
         });
     });

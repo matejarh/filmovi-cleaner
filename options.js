@@ -107,6 +107,7 @@ const load = async () => {
     lastBlocked: null,
 
     lastBlockedDomain: null,
+    lastPopupDomain: null,
     blockingEnabled: true,
   });
 
@@ -243,8 +244,10 @@ const renderStats = (data) => {
   const last = document.getElementById("lastBlocked");
 
   const lastDomainText = document.getElementById("lastBlockedDomainText");
+  const lastPopupDomainText = document.getElementById("lastPopupDomainText");
 
   lastDomainText.textContent = "";
+  lastPopupDomainText.textContent = "";
 
   if (data.lastBlocked && data.lastBlockedDomain) {
     const date = new Date(data.lastBlocked);
@@ -259,36 +262,40 @@ const renderStats = (data) => {
 
     const domain = normalizeDomain(data.lastBlockedDomain);
 
-    if (data.blockedDomains.some((item) => {
-      const blockedDomain = normalizeDomain(item);
-      return blockedDomain && (domain === blockedDomain || domain.endsWith(`.${blockedDomain}`));
-    })) {
-      const value = document.createElement("span");
+    const value = document.createElement("span");
 
-      value.textContent = domain;
-      lastDomainText.appendChild(value);
-    } else {
-      const button = document.createElement("button");
-
-      button.type = "button";
-      button.className = "clickable-domain";
-      button.textContent = domain;
-
-      button.addEventListener("click", async () => {
-        const added = await addDomainToList(domain);
-
-        if (added) {
-          showMessage(`Added ${domain}`);
-          load();
-        }
-      });
-
-      lastDomainText.appendChild(button);
-    }
+    value.textContent = domain;
+    lastDomainText.appendChild(value);
   } else {
     last.textContent = "No blocks recorded yet.";
-
     lastDomainText.textContent = "Last blocked domain: none";
+  }
+
+  const popupDomain = normalizeDomain(data.lastPopupDomain);
+  const popupLabel = document.createElement("span");
+  popupLabel.textContent = "Last unblocked popup domain: ";
+  lastPopupDomainText.appendChild(popupLabel);
+
+  if (popupDomain) {
+    const popupButton = document.createElement("button");
+    popupButton.type = "button";
+    popupButton.className = "clickable-domain";
+    popupButton.textContent = popupDomain;
+    popupButton.addEventListener("click", async () => {
+      const added = await addDomainToList(popupDomain);
+      if (added) {
+        showMessage(`Added ${popupDomain}`);
+        load();
+      } else {
+        showMessage("That domain is already blocked.");
+        load();
+      }
+    });
+    lastPopupDomainText.appendChild(popupButton);
+  } else {
+    const popupValue = document.createElement("span");
+    popupValue.textContent = "none";
+    lastPopupDomainText.appendChild(popupValue);
   }
 
   const stats = document.getElementById("domainStats");
@@ -359,7 +366,7 @@ const showMessage = (text) => {
 };
 
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === "local" && (changes.blockingEnabled || changes.totalBlocked || changes.blockedDomains)) {
+  if (area === "local" && (changes.blockingEnabled || changes.totalBlocked || changes.blockedDomains || changes.lastPopupDomain)) {
     load();
   }
 });
