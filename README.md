@@ -73,11 +73,11 @@ The extension starts with this domain blocked by default:
 
 #### Dark
 
-![Options page screenshot](options-screenshoot-dark.png)
+![Options page screenshot](screenshots/options-screenshoot-dark.png)
 
 #### Light
 
-![Options page screenshot](options-screenshoot-light.png)
+![Options page screenshot]screenshots/options-screenshoot-light.png)
 
 ### Extension icon in browser
 
@@ -85,7 +85,7 @@ The extension starts with this domain blocked by default:
 
 ### Statistics popup
 
-![Statistics popup in dark theme](popup-stats-dark.png)
+![Statistics popup in dark theme](screenshots/popup-stats-dark.png)
 
 ## Notes
 
