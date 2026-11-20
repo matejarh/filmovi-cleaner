@@ -1,6 +1,6 @@
 importScripts("format.js");
 
-const DEFAULT_DOMAINS = ["remitalamends.qpon"];
+const DEFAULT_DOMAINS = [".qpon", ".cyou"];
 
 const RULE_ID_BASE = 1000;
 
@@ -21,13 +21,20 @@ const RULE_ID_BASE = 1000;
         .replace(/^\*\./, "");
 }; */
 const normalizeDomain = (domain) => {
-  return String(domain || "")
+  const input = String(domain || "")
     .trim()
-    .toLowerCase()
+    .toLowerCase();
+  const suffixMatch = input.match(/^\.([a-z]{2,}|xn--[a-z0-9-]+)$/);
+  if (suffixMatch) return `.${suffixMatch[1]}`;
+  const bareMatch = input.match(/^[a-z]{2,}$|^xn--[a-z0-9-]+$/);
+  if (bareMatch) return `.${bareMatch[0]}`;
+
+  return input
     .replace(/^https?:\/\//, "")
     .split("/")[0]
     .split(":")[0]
-    .replace(/^\*\./, "");
+    .replace(/^\*\./, "")
+    .replace(/^\.+|\.+$/g, "");
 };
 
 /*
@@ -68,7 +75,7 @@ const updateRules = async (domains) => {
       // These are user-selected blocked destinations. Keep the rule effective
       // for direct clicks and browser history navigations too, where Chromium
       // may not report FilmoviPlex as the request initiator.
-      requestDomains: [domain],
+      requestDomains: [domain.startsWith(".") ? domain.slice(1) : domain],
 
       resourceTypes: [
         "main_frame",
@@ -149,7 +156,13 @@ const recordPopup = async (domain) => {
 
   const isBlocked = data.blockedDomains.some((item) => {
     const blockedDomain = normalizeDomain(item);
-    return blockedDomain && (domain === blockedDomain || domain.endsWith(`.${blockedDomain}`));
+    if (!blockedDomain) return false;
+    const base = blockedDomain.startsWith(".")
+      ? blockedDomain.slice(1)
+      : blockedDomain.startsWith("*.")
+        ? blockedDomain.slice(2)
+        : blockedDomain;
+    return domain === base || domain.endsWith(`.${base}`);
   });
 
   if (!isBlocked) {

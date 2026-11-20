@@ -55,7 +55,7 @@
         const version = ++settingsVersion;
         try {
             const settings = await chrome.storage.local.get({
-                blockedDomains: ["remitalamends.qpon"],
+                blockedDomains: [".qpon", ".cyou"],
                 blockingEnabled: true
             });
             if (version !== settingsVersion) return;

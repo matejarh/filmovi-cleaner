@@ -22,9 +22,17 @@
             .replace(/^\*\./, "");
     }; */
   const normalizeDomain = (domain) => {
-    return String(domain || "")
+    const input = String(domain || "")
       .trim()
-      .toLowerCase()
+      .toLowerCase();
+    const suffixMatch = input.match(/^\.([a-z]{2,}|xn--[a-z0-9-]+)$/);
+    if (suffixMatch) return `.${suffixMatch[1]}`;
+    const wildcardMatch = input.match(/^\*\.([a-z]{2,}|xn--[a-z0-9-]+)$/);
+    if (wildcardMatch) return `.${wildcardMatch[1]}`;
+    const bareMatch = input.match(/^[a-z]{2,}$|^xn--[a-z0-9-]+$/);
+    if (bareMatch) return `.${bareMatch[0]}`;
+
+    return input
       .replace(/^https?:\/\//, "")
       .split("/")[0]
       .split(":")[0]
@@ -65,17 +73,12 @@
       const hostname = url.hostname.toLowerCase();
 
       for (const domain of blockedDomains) {
-        if (domain.startsWith("*.")) {
-          const baseDomain = domain.slice(2);
-
-          if (hostname === baseDomain || hostname.endsWith("." + baseDomain)) {
-            return hostname;
-          }
-        } else {
-          if (hostname === domain || hostname.endsWith("." + domain)) {
-            return hostname;
-          }
-        }
+        const base = domain.startsWith(".")
+          ? domain.slice(1)
+          : domain.startsWith("*.")
+            ? domain.slice(2)
+            : domain;
+        if (hostname === base || hostname.endsWith("." + base)) return hostname;
       }
     } catch {}
 

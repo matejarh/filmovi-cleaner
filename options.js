@@ -1,4 +1,4 @@
-const DEFAULT_DOMAINS = ["remitalamends.qpon"];
+const DEFAULT_DOMAINS = [".qpon", ".cyou"];
 
 const THEME_STORAGE_KEY = "filmoviplex-theme";
 
@@ -40,8 +40,15 @@ const applyTheme = (theme) => {
         .replace(/^\*\./, "");
 }; */
 const normalizeDomain = (domain) => {
-  const input = String(domain || "").trim().replace(/^\*\./, "");
+  const input = String(domain || "").trim().toLowerCase();
   if (!input) return "";
+
+  const suffixMatch = input.match(/^\.([a-z]{2,}|xn--[a-z0-9-]+)$/);
+  if (suffixMatch) return `.${suffixMatch[1]}`;
+  const wildcardMatch = input.match(/^\*\.([a-z]{2,}|xn--[a-z0-9-]+)$/);
+  if (wildcardMatch) return `.${wildcardMatch[1]}`;
+  const bareMatch = input.match(/^[a-z]{2,}$|^xn--[a-z0-9-]+$/);
+  if (bareMatch) return `.${bareMatch[0]}`;
 
   try {
     const url = new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(input) ? input : `https://${input}`);

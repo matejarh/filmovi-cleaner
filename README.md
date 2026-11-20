@@ -52,7 +52,7 @@ This extension is intended for Chromium-based browsers that support Manifest V3 
 
 1. Click the FilmoviPlex Cleaner icon in the browser toolbar to view blocked-popup statistics.
 2. Use **Manage domains** in the popup to open the extension options page.
-3. Add or remove domains in the extension options page. Full HTTP(S) URLs are accepted and normalized to their domain; subdomains are included.
+3. Add or remove domains in the extension options page. Full HTTP(S) URLs are accepted and normalized to their domain; subdomains are included. You can also add top-level domains or suffixes such as `.qpon`, `qpon`, `.cyou`, or `cyou`, which block all subdomains under that suffix.
 4. Visit FilmoviPlex pages and the extension will automatically block matching popup traffic.
 
 Use **Blocking enabled** in the popup or options page to pause or resume blocking. Domain and pause changes are sent to open FilmoviPlex frames automatically. Resetting statistics requires confirmation.
@@ -61,11 +61,12 @@ In the options page, the last blocked domain is displayed as plain text. When a 
 
 The toolbar popup follows the browser's light or dark appearance automatically. It does not have a theme button.
 
-## Default domain
+## Default domains
 
-The extension starts with this domain blocked by default:
+The extension starts with these top-level domains blocked by default:
 
-- `remitalamends.qpon`
+- `.qpon`
+- `.cyou`
 
 ## Screenshots
 

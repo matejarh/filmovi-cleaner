@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "FilmoviPlex Cleaner",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Blocks unwanted advertising popups on FilmoviPlex.",
 
   "icons": {
@@ -18,7 +18,7 @@
 
   "permissions": ["storage", "declarativeNetRequest", "declarativeNetRequestFeedback"],
 
-  "host_permissions": ["*://*.filmoviplex.com/*", "*://*.remitalamends.qpon/*", "*://*.qpon/*"],
+  "host_permissions": ["*://*.filmoviplex.com/*", "*://*.qpon/*", "*://*.cyou/*"],
 
   "background": {
     "service_worker": "background.js"
