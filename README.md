@@ -77,7 +77,7 @@ The extension starts with this domain blocked by default:
 
 #### Light
 
-![Options page screenshot]screenshots/options-screenshoot-light.png)
+![Options page screenshot](screenshots/options-screenshoot-light.png)
 
 ### Extension icon in browser
 
